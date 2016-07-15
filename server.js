@@ -1,13 +1,23 @@
 const express = require ('express');
+const methodOverride = require('method-override');
 const app = express();
 var productsDB = [];
 bodyParser = require('body-parser');
+app.set('view engine', 'jade');
+app.set('views', './templates');
 
 /* MIDDLEWARE */
 app.use(bodyParser.urlencoded({ extended: true}));
+app.use(methodOverride(function(req, res){
+  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+    // look in urlencoded POST bodies and delete it
+    var method = req.body._method
+    delete req.body._method
+    return method
+  }
+}))
 
 /* ROUTES */
-
 app.route('/products/')
   .post((req, res) => {
     if (req.body.hasOwnProperty('name') && req.body.hasOwnProperty('price') && req.body.hasOwnProperty('inventory')){
@@ -20,32 +30,51 @@ app.route('/products/')
       productsDB.push(data);
       res.send({ "success": true });
     } else {
-    res.send({ "success": false });
+      res.send({ "success": false });
     }
   console.log(productsDB);
+  })
+  .get ((req, res) => {
+    res.render('products/index.jade', {productsDB: productsDB});
+  })
+
+app.route('/products/new')
+  .get ((req, res) => {
+    res.render('products/new.jade')
   })
 
 app.route('/products/:id')
   .put ((req, res) => {
-    if (productsDB[req.params.id] !== undefined) {
-      if (productsDB[req.params.id].name !== undefined) {
-        productsDB[req.params.id].name = req.body.name;
+    var idSelected = productsDB[req.body.id];
+    if (idSelected !== undefined) {
+      if (idSelected.name !== undefined) {
+        idSelected.name = req.body.name;
       }
-      if (productsDB[req.params.id].price !== undefined) {
-        productsDB[req.params.id].price = req.body.price;
+      if (idSelected.price !== undefined) {
+        idSelected.price = req.body.price;
       }
-      if (productsDB[req.params.id].inventory !== undefined) {
-        productsDB[req.params.id].inventory = req.body.inventory;
+      if (idSelected.inventory !== undefined) {
+        idSelected.inventory = req.body.inventory;
       }
+    res.send({ "success": true });
+    } else {
+      res.send({ "success": false });
     }
     console.log(productsDB);
   })
-  .put ((req, res) => {
-    if (productsDB[req.params.id] !== undefined) {
-      productsDB.slice(productsDB[req.params.id], 1);
+  .delete ((req, res) => {
+    var idSelected = productsDB[req.params.id];
+    if (idSelected !== undefined) {
+      productsDB.splice(productsDB.indexOf(idSelected), 1);
+      res.send({ "success": true });
+    } else {
+      res.send({ "success": false });
     }
     console.log(productsDB);
-  });
+  })
+  .get ((req, res) => {
+    res.render('products/edit.jade', {productsDB: productsDB});
+  })
 
 var server = app.listen(3000, () => {
   console.log('listening...');

@@ -1,0 +1,9 @@
+form(method="POST" action="/products/:id")
+  input(type='text' name='name' placeholder='Name' enctype="application/x-www-form-urlencoded")
+  input(type='text' name='price' placeholder='Price')
+  input(type='text' name='inventory' placeholder='Inventory')
+  input(type='text' name='id' placeholder='ID')
+  input(type="hidden" name="_method" value="PUT")
+  button(type="submit") Submit
+  //- button save submit
+  //- input type submit
