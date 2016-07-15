@@ -2,6 +2,7 @@ const express = require ('express');
 const methodOverride = require('method-override');
 const app = express();
 var productsDB = [];
+var articlesDB = [];
 bodyParser = require('body-parser');
 app.set('view engine', 'jade');
 app.set('views', './templates');
@@ -80,8 +81,36 @@ var server = app.listen(3000, () => {
   console.log('listening...');
 });
 
-/*function isDefined (any) {
-  if (any !== undefined) {
-    return true;
-  }
-}*/
+app.route('/articles')
+  .post((req, res) => {
+    if (req.body.hasOwnProperty('body') && req.body.hasOwnProperty('author')) {
+      var article = {
+        title: articlesDB.length,
+        body: req.body.body,
+        author: req.body.author,
+        urlTitle: req.url + articlesDB.length
+      };
+      articlesDB.push(article);
+      console.log(articlesDB);
+      res.send({ "success": true });
+    } else {
+      res.send({ "success": false });
+    }
+  });
+
+app.route('/articles/:title')
+  .put ((req, res) => {
+    var titleSelected = articlesDB[req.params.title];
+    if (articlesDB[req.params.title] !== undefined) {
+      if (req.body.hasOwnProperty('title')) {
+        articlesDB[req.body.title] = {
+          title: req.body.title,
+          body: titleSelected.body,
+          author: titleSelected.author,
+          urlTitle: req.url + req.body.title.replace(" ", '%20')
+        };
+        res.send({ "success": true });
+        console.log(articlesDB[req.body.title]);
+      }
+    }
+  });
