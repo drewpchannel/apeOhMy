@@ -1,8 +1,10 @@
 const express = require ('express');
 const methodOverride = require('method-override');
 const app = express();
+const fs = require('fs');
 var productsDB = [];
 var articlesDB = [];
+
 bodyParser = require('body-parser');
 app.set('view engine', 'jade');
 app.set('views', './templates');
@@ -17,6 +19,39 @@ app.use(methodOverride(function(req, res){
     return method
   }
 }))
+app.use('/', (req, res, next) => {
+  var date = new Date();
+  fs.appendFileSync('log.log', req.originalMethod + " " + req.url + " " + date.toISOString() + '\r\n');
+  next();
+})
+app.use('/products', (req, res, next) => {
+  if(req.method === 'GET') {
+    next();
+  } else if (req.body.hasOwnProperty('name') && req.body.hasOwnProperty('price') && req.body.hasOwnProperty('inventory')){
+    next();
+  } else {
+    res.send('400');
+  }
+})
+app.use('/products/:id', (req, res, next) => {
+  if(req.method === 'PUT') {
+    if (req.body.hasOwnProperty('title')) {
+      next();
+    }
+    if(req.method === 'DELETE' || req.method === 'GET') {
+      next();
+    }
+  } else {
+    res.send('400');
+  }
+})
+app.use('/articles', (res, req, next) => {
+  if (req.header.version === '1.0') {
+    next();
+  } else {
+    res.send({ "error": "bad headers" });
+  }
+})
 
 /* ROUTES */
 app.route('/products/')
@@ -104,17 +139,26 @@ app.route('/articles')
 app.route('/articles/:title')
   .put ((req, res) => {
     var titleSelected = articlesDB[req.params.title];
-    if (articlesDB[req.params.title] !== undefined) {
-      if (req.body.hasOwnProperty('title')) {
-        articlesDB[req.body.title] = {
-          title: req.body.title,
-          body: titleSelected.body,
-          author: titleSelected.author,
-          urlTitle: req.url + req.body.title.replace(" ", '%20')
-        };
-        res.send({ "success": true });
-        console.log(articlesDB[req.body.title]);
-      }
+    if (req.body.editCheck === undefined) {
+      articlesDB[req.body.title] = {
+        title: req.body.title,
+        body: titleSelected.body,
+        author: titleSelected.author,
+        urlTitle: req.url + req.body.title.replace(" ", '%20')
+      };
+      res.send({ "success": true });
+      console.log(articlesDB[req.body.title]);
+    }
+    if (req.body.editCheck !== undefined) {
+  console.log('hits');
+      articlesDB[req.body.title] = {
+        title: req.body.title,
+        body: req.body.body,
+        author: req.body.author,
+        urlTitle: req.url + req.body.title.replace(" ", '%20')
+      };
+      res.send({ "success": true });
+      console.log(articlesDB[req.body.title]);
     }
   })
   .delete ((req, res) => {
@@ -134,4 +178,9 @@ app.route('/articles/:title')
 app.route('/articles/:title/edit')
   .get((req, res) => {
     res.render('articles/edit.jade', {articlesDB: articlesDB});
+  })
+
+app.route('/articles/new')
+  .get((req, res) => {
+    res.render('articles/new.jade', {articlesDB: articlesDB});
   })

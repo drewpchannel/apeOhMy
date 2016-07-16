@@ -2,5 +2,6 @@ form(method="POST" action="/articles/:title")
   input(type='text' name='title' placeholder='Title' enctype="application/x-www-form-urlencoded")
   input(type='text' name='author' placeholder='Author')
   input(type='text' name='body' placeholder='Body')
+  input(type="hidden" name="editCheck" value="editCheck")
   input(type="hidden" name="_method" value="PUT")
   button(type="submit") Submit
