@@ -96,7 +96,10 @@ app.route('/articles')
     } else {
       res.send({ "success": false });
     }
-  });
+  })
+  .get ((req, res) => {
+    res.render('articles/index.jade', {articlesDB: articlesDB});
+  })
 
 app.route('/articles/:title')
   .put ((req, res) => {
@@ -126,4 +129,9 @@ app.route('/articles/:title')
     } else {
       res.send({'success': false});
     }
+  })
+
+app.route('/articles/:title/edit')
+  .get((req, res) => {
+    res.render('articles/edit.jade', {articlesDB: articlesDB});
   })
