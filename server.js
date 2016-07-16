@@ -113,4 +113,17 @@ app.route('/articles/:title')
         console.log(articlesDB[req.body.title]);
       }
     }
-  });
+  })
+  .delete ((req, res) => {
+    if (articlesDB[req.body.title] !== undefined) {
+      for (var i = 0; i < articlesDB.length; i++){
+        if (articlesDB[i].title.toString() === req.body.title) {
+          articlesDB.splice(i, 1);
+          res.send({'success': true});
+          console.log(articlesDB);
+        }
+      }
+    } else {
+      res.send({'success': false});
+    }
+  })
