@@ -45,8 +45,8 @@ app.use('/products/:id', (req, res, next) => {
     res.send('400');
   }
 })
-app.use('/articles', (res, req, next) => {
-  if (req.header.version === '1.0') {
+app.use('/articles', (req, res, next) => {
+  if (req.headers.version === '1.0') {
     next();
   } else {
     res.send({ "error": "bad headers" });
